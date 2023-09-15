@@ -39,7 +39,9 @@ const Core = {
 				if ( oldNode.nodeName === newNode.nodeName ) {
 
 					// If we have the same nodename then we can directly update the attributes.
-					Core.setAttributes(oldNode.attributes, newNode.attributes)
+					Core.setAttributes(oldNode.attributes, newNode.attributes);
+
+					Core.DEBUG && console.log("[syncDom] update attributes", {oldNode, "old_attr": oldNode.attributes, "new_attr": newNode.attributes});
 
 				} else {
 
@@ -51,6 +53,8 @@ const Core = {
 
 					// Replace the original node with the new one with the right tag.
 					oldNode.parentNode.replaceChild(newPrev, oldNode);
+
+					Core.DEBUG && console.log("[syncDom] replace the node", oldNode);
 				}
 
 			} else {
@@ -58,7 +62,9 @@ const Core = {
 				// Handle other types of node updates (text/comments/etc).
 				// If both are the same type of node we can update directly.
 				if ( oldNode.nodeValue !== newNode.nodeValue ) {
-					oldNode.nodeValue = newNode.nodeValue
+					oldNode.nodeValue = newNode.nodeValue;
+
+					Core.DEBUG && console.log("[syncDom] update value directly", oldNode);
 				}
 			}
 
@@ -86,7 +92,7 @@ const Core = {
 			a = oldAttributes[i]
 			ns = a.namespaceURI
 			name = a.localName
-			b = newAttributes.getNamedItemNS(ns, name)
+			b = newAttributes.getNamedItemNS(ns, name);
 			if ( !b ) oldAttributes.removeNamedItemNS(ns, name)
 		}
 	
@@ -358,7 +364,7 @@ const syncDOM = function(oldNode, newNode, options=null) {
 
 			// If a string was provided we will parse it as dom.
 			? Core.parseHTML(newNode, oldNode.nodeName)
-			
+
 			: newNode
 		)
 	}
