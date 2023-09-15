@@ -4,6 +4,7 @@
  */
 
 const Core = {
+	DEBUG: false,
 	KEY: 'data-key',
 	IGNORE: 'data-ignore',
 	CHECKSUM: 'data-checksum',
@@ -313,7 +314,13 @@ const Core = {
 	 */
 	assert: function(val, msg) {
 		if (!val) throw new Error('sync-dom: ' + msg)
-	}
+	},
+
+	setConfig: function(options={}){
+
+		Core.DEBUG = options.debug;
+
+	},
 }
 
 Core.NODE_MOUNTED = Core.KEY_PREFIX + 'mounted';
@@ -324,11 +331,15 @@ Core.NODE_MOUNTED = Core.KEY_PREFIX + 'mounted';
  *
  * @param {Node} oldNode - The html entity to update.
  * @param {String|Node} newNode - The updated html(entity).
+ * @param {object} options
+ * @param {bool} options.debug
  */
-const syncDOM = function(oldNode, newNode) {
+const syncDOM = function(oldNode, newNode, options=null) {
 
 	// Ensure a realish dom node is provided.
 	Core.assert(oldNode && oldNode.nodeType, 'You must provide a valid node to update.');
+
+	if ( options ) Core.setConfig(options);
 
 	// Alias document element with document.
 	if ( oldNode.nodeType === Core.DOCUMENT_TYPE ) oldNode = oldNode.documentElement
@@ -347,6 +358,7 @@ const syncDOM = function(oldNode, newNode) {
 
 			// If a string was provided we will parse it as dom.
 			? Core.parseHTML(newNode, oldNode.nodeName)
+			
 			: newNode
 		)
 	}
