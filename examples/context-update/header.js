@@ -1,8 +1,9 @@
-import CartHead from "./cart-head.js";
+import CartHead from "./header-cart.js";
 import { Context } from "../../src/core/jeact.js";
+import HeaderSearch from "./header-search.js";
 
 export default function Header(props={}){
-    
+ 
     return $("<header>", {
         class: "border p-3 row",
         html: [
@@ -12,10 +13,7 @@ export default function Header(props={}){
             }),
             $("<div>", {
                 class: "col-md-6",
-                html: $("<input>", {
-                    class: "form-control",
-                    placeholder: "Busca..."
-                })
+                html: HeaderSearch
             }),
             $("<div>", {
                 class: "col-md-3",
