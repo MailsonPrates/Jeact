@@ -59,7 +59,6 @@ export function State(initialState, contextName=null){
     };
 
 
-
     // Store the pair for future renders
     // and prepare for the next Hook call.
     componentHooks[currentHookIndex] = pair;
