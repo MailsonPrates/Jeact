@@ -1,5 +1,6 @@
 /**
  * @ref https://github.com/DylanPiercey/set-dom
+ * @todo need a huge refactor to clear code
  */
 
 const Core = {
@@ -28,10 +29,10 @@ const Core = {
 			if ( oldNode.nodeType === Core.ELEMENT_TYPE ) {
 
 				// Checks if nodes are equal before diffing.
-				if (Core.isEqualNode(oldNode, newNode)) return
+				if ( Core.isEqualNode(oldNode, newNode) ) return;
 		
 				// Update all children (and subchildren).
-				Core.setChildNodes(oldNode, newNode)
+				Core.setChildNodes(oldNode, newNode);
 		
 				// Update the elements attributes / tagName.
 				if ( oldNode.nodeName === newNode.nodeName ) {
@@ -42,13 +43,13 @@ const Core = {
 				} else {
 
 					// Otherwise clone the new node to use as the existing node.
-					var newPrev = newNode.cloneNode()
+					var newPrev = newNode.cloneNode();
 
 					// Copy over all existing children from the original node.
-					while (oldNode.firstChild) newPrev.appendChild(oldNode.firstChild)
+					while (oldNode.firstChild) newPrev.appendChild(oldNode.firstChild);
 
 					// Replace the original node with the new one with the right tag.
-					oldNode.parentNode.replaceChild(newPrev, oldNode)
+					oldNode.parentNode.replaceChild(newPrev, oldNode);
 				}
 
 			} else {
@@ -330,7 +331,7 @@ const syncDOM = function(oldNode, newNode) {
 	Core.assert(oldNode && oldNode.nodeType, 'You must provide a valid node to update.');
 
 	// Alias document element with document.
-	if (oldNode.nodeType === Core.DOCUMENT_TYPE) oldNode = oldNode.documentElement
+	if ( oldNode.nodeType === Core.DOCUMENT_TYPE ) oldNode = oldNode.documentElement
 
 	// Document Fragments don't have attributes, so no need to look 
 	// at checksums, ignored, attributes, or node replacement.
@@ -352,8 +353,8 @@ const syncDOM = function(oldNode, newNode) {
 
 	// Trigger Core.mount events on initial set.
 	if ( !oldNode[Core.NODE_MOUNTED] ) {
-		oldNode[Core.NODE_MOUNTED] = true
-		Core.mount(oldNode)
+		oldNode[Core.NODE_MOUNTED] = true;
+		Core.mount(oldNode);
 	}
 }
 
