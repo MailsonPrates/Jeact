@@ -8,6 +8,8 @@ import syncDOM from "./syncDom.js";
 let componentHooks = [];
 let currentHookIndex = 0;
 
+$.componentHooks = componentHooks;
+
 export const Context = context();
 
 export function State(initialState, contextName=null){
