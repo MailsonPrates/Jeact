@@ -1,11 +1,15 @@
+import Template from "./template/index.js";
+
 export default function Placeholder(){
-    return $("<div>", {
-        class: "placeholder-glow",
-        html: [
-            $("<span>", {class: "placeholder col-6"}),
-            $("<span>", {class: "placeholder col-6"}),
-            $("<span>", {class: "placeholder col-8"}),
-            $("<span>", {class: "placeholder col-4"})
-        ]
+    return Template({
+        content: $("<div>", {
+            class: "placeholder-glow",
+            html: [
+                $("<div>", {html: $("<span>", {class: "placeholder col-6"})}),
+                $("<div>", {html: $("<span>", {class: "placeholder col-6"})}),
+                $("<div>", {html: $("<span>", {class: "placeholder col-8"})}),
+                $("<div>", {html: $("<span>", {class: "placeholder col-4"})})
+            ]
+        })
     })
 }

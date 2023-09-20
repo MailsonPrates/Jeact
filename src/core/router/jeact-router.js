@@ -11,6 +11,8 @@ export function Router(props={}){
         routes: []
     }, props);
 
+    //const RouteState = State({});
+
     const Query = {
 
         get: function(key="", props={}){

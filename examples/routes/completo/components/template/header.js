@@ -17,8 +17,8 @@ export default function Header(){
                     class: "nav-item",
                     html: Link({
                         class: "nav-link",
-                        href: "",
-                        html: "Link 1"
+                        href: "/login",
+                        html: "Login"
                     })
                 }),
                 $("<li>", {

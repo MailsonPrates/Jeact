@@ -1,9 +1,11 @@
 import { Router } from "../../../src/core/router/jeact-router.js";
 import { State } from "../../../src/core/jeact.js";
-import Template from "./components/template/index.js";
 import Home from "./pages/home.js";
 import Category from "./pages/category.js";
 import Placeholder from "./components/placeholder.js";
+import Login from "./pages/login.js";
+
+console.log("[App] //");
 
 /**
  * 
@@ -14,9 +16,19 @@ import Placeholder from "./components/placeholder.js";
 
 export default function App(){
 
+    console.log("[App]");
+
     const state = State({
         route: {}
     }, "global");
+
+    const DefaultPlaceholder = () => {
+        console.log("Defalt");
+
+        return $("<div>", {
+            html: state.route.component || "Loading..."
+        });
+    }
 
     Router({
         routes: [
@@ -25,7 +37,7 @@ export default function App(){
                 handler: (req) => state.set("route", {
                     request: req,
                     title: "Home",
-                    component: Home.bind(this, req)
+                    component: Home.bind(this, {req, title: "Home"})
                 })
             },
             {
@@ -33,7 +45,7 @@ export default function App(){
                 handler: (req) => state.set("route", {
                     request: req,
                     title: "Category",
-                    component: Category.bind(this, req)
+                    component: Category.bind(this, {req, title: "Category"})
                 })
             },
             {
@@ -49,10 +61,11 @@ export default function App(){
                         import("./pages/contact.js")
                             .then(function(module){
                                 setTimeout(function(){
+                                    
                                     state.set("route", {
                                         request: req,
-                                        title: "Category",
-                                        component: module.default.bind(this, req)
+                                        title: "Contact",
+                                        component: module.default.bind(this, {req, title: "Contact"})
                                     });
                                 }, 2000)
                             });
@@ -60,11 +73,23 @@ export default function App(){
                         return Placeholder();
                     }
                 })
+            },
+            {
+                /**
+                 * Template diferente
+                 */
+                path: "/login",
+                handler: (req) => state.set("route", {
+                    request: req,
+                    title: "Login",
+                    component: Login.bind(this, req)
+                })
             }
+
         ]
     });
 
     $.router.goTo("/");
 
-    return state.render(Template);
+    return state.render(DefaultPlaceholder);
 }

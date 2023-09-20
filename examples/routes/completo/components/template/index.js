@@ -1,13 +1,8 @@
-import { Context } from "../../../../../src/core/jeact.js";
 import Header from "./header.js";
 import Main from "./main.js";
 import Sidebar from "./sidebar.js";
 
-export default function Template(){
-
-    const currentRoute = Context.get("global", "route");
-
-    console.log("[Template]", {currentRoute});
+export default function Template(props={}){
 
     return $("<div>", {
         class: "template template-main",
@@ -26,8 +21,8 @@ export default function Template(){
     
                             Main({
                                 class: "template-main col-md-9 bg-light p-4",
-                                content: currentRoute.component,
-                                title: currentRoute.title
+                                content: props.content,
+                                title: props.title
                             })
                         ]
                     })
