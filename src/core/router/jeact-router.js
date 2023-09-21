@@ -15,6 +15,16 @@
 
 import { State } from "../jeact.js";
 
+/**
+ * @param {object} props
+ * @param {bool} props.historyMode
+ * @param {bool} props.caseInsensitive
+ * @param {string} props.fallback
+ * @param {array} props.routes
+ * @param {int} props.importDelay
+ * 
+ * @returns {Router}
+ */
 export function Router(props={}){
 
     const Configs = $.extend(true, {
