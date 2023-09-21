@@ -6,10 +6,14 @@
  * - [X] Implementar metodo render
  * - [X] Implementar groups (childrens)
  * - [X] Refatorar add routes (add no init)
- * - [ ] Implementar opção de component fail default a nível de grupo ou global
+ * - [ ] Implementar componente de fail default
+ * - [ ] Implementar componente de fail default a nivel de grupo
+ * - [ ] Implementar componente de fail default a nivel global
  * - [ ] Implementar lang para mensagens
  * - [ ] Implementar hook para import com erro
- * - [ ] Implementar componente de placeholder default a nivel de de rota ou global
+ * - [ ] Implementar componente de placeholder default
+ * - [X] Implementar componente de placeholder default a nivel de grupo
+ * - [ ] Implementar componente de placeholder default a nivel global
  * - [X] Implementar opção de delay minimo para os componentes dinamicos
  * - [ ] Implementar método customizado para o import dinamico (diferente de default)
  * - [ ] Implementar alteração do titulo da janela
