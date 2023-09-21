@@ -127,7 +127,7 @@ export function Router(props={}){
 
             let uri = props.path;
             let handler = props.handler;
-            let group = props.group || [];
+            let group = props.group || {routes: []};
 
             if ( !uri || typeof uri != "string" ) return;
       
@@ -159,9 +159,12 @@ export function Router(props={}){
             Core.routes.push(route);
             Core.uris.push(uri);
 
-            if ( group.length ){
-                group.forEach(function(chilRoute){
+            if ( group.routes.length ){
+                group.routes.forEach(function(chilRoute){
+                    
+                    // Herda do parent route
                     chilRoute.path = uri + chilRoute.path;
+
                     Core.get(chilRoute);
                 });
             }
