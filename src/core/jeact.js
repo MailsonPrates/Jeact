@@ -1,5 +1,8 @@
 /**
  *  Jeact = jQuery + ESM + reactive
+ * 
+ * @todo
+ * - Add default value to arg initialState={}
  */
 
 import context from "./context.js";
