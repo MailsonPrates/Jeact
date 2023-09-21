@@ -6,13 +6,6 @@ import Placeholder from "./components/placeholder.js";
 import OtherPlaceholder from "./components/other-placeholder.js";
 import Login from "./pages/login.js";
 
-/**
- * 
- * @todo
- * - Import dinamic componente
- *  https://javascript.info/modules-dynamic-imports
- */
-
 export default function App(){
 
     console.log("[App]");
@@ -56,10 +49,6 @@ export default function App(){
             {
                 /**
                  * @example Handler com componente dinamico
-                 * @todo
-                 * - Implementar componente de erro customizado
-                 * - Implementar placeholder filename
-                 * - Implementar método import customizado
                  */
                 path: "/contact", 
                 handler: {
