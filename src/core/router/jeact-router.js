@@ -119,7 +119,7 @@ export function Router(props={}){
 
         /**
          * @param {object} props 
-         * @param {string} props.uri
+         * @param {string} props.path
          * @param {object|function} props.handler
          * @param {array} props.group
          */
@@ -128,6 +128,7 @@ export function Router(props={}){
             let uri = props.path;
             let handler = props.handler;
             let group = props.group || {routes: []};
+            let hasGroup = group.routes.length;
 
             if ( !uri || typeof uri != "string" ) return;
       
@@ -147,6 +148,27 @@ export function Router(props={}){
 
             uri = uri.startsWith("/") ? uri : `/${uri}`;
 
+            if ( hasGroup ){
+
+                group.routes.forEach(function(chilRoute){
+                    
+                    let isSlashPath = chilRoute.path == "/";
+                    chilRoute.path = isSlashPath ? uri : (uri + chilRoute.path);
+
+                    let hasGroupPlaceholder = group.placeholder 
+                        && chilRoute.handler 
+                        && $.type(chilRoute.handler.component) == "object";
+
+                    if ( hasGroupPlaceholder ){
+                        chilRoute.handler.component.placeholder = group.placeholder;
+                    }
+
+                    Core.get(chilRoute);
+                });
+
+                return;
+            }
+
             let uriAlreadyExist = Core.uris.indexOf(uri) !== -1;
 
             if ( uriAlreadyExist ) return;
@@ -158,16 +180,6 @@ export function Router(props={}){
 
             Core.routes.push(route);
             Core.uris.push(uri);
-
-            if ( group.routes.length ){
-                group.routes.forEach(function(chilRoute){
-                    
-                    // Herda do parent route
-                    chilRoute.path = uri + chilRoute.path;
-
-                    Core.get(chilRoute);
-                });
-            }
         },
 
         run: function(){
