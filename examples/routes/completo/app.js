@@ -23,9 +23,12 @@ export default function App(){
         console.log("[Default]", route);
 
         return $("<div>", {
-            html: route.component.bind(null, route.request) || "Loading..."
+            html: route.component.bind(null, route) || "Loading..."
         });
     }
+
+    // local only
+    const getPath = (filename) => `/Dev/Jeact/Jeact/examples/routes/completo/pages/${filename}.js`;
 
     return Router({
         routes: [
@@ -43,7 +46,7 @@ export default function App(){
                 /**
                  * @example Handler como objeto
                  */
-                path: "/category", 
+                path: "/category/{name}", 
                 handler: {
                     title: "Category",
                     component: Category
@@ -61,7 +64,7 @@ export default function App(){
                 handler: {
                     title: "Contact",
                     component: {
-                        filename: "/Dev/Jeact/Jeact/examples/routes/completo/pages/contact.js",
+                        filename: getPath("contact"),
                         placeholder: Placeholder,
                         //fail: Fail
                     }
@@ -75,6 +78,49 @@ export default function App(){
                 handler: {
                     component: Login
                 }
+            },
+            {
+                /**
+                 * @example Rotas filhas agrupadas
+                 */
+                path: "/pedidos",
+                handler: {
+                    component: {
+                        filename: getPath("pedido-lista"),
+                        placeholder: Placeholder
+                    },
+                    title: "Pedidos"
+                },
+                group: [
+                    {
+                        path: "/{id}",
+                        handler: {
+                            component: {filename: getPath("pedido-detalhes")},
+                            title: "Pedido detalhes"
+                        },
+                        group: [
+                             /**
+                             * @example nested
+                             */
+                            {
+                                path: "/imprimir",
+                                handler: {
+                                    component: {filename: getPath("pedido-imprimir")},
+                                    title: "Imprimir pedido"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        path: "/filter",
+                        handler: {
+                            component: {
+                                filename: getPath("pedido-filter")
+                            }
+                        }
+
+                    }
+                ]
             }
 
         ]

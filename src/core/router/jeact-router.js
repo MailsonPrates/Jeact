@@ -4,7 +4,7 @@
  * @todo
  * - [X] Implementar State proprio
  * - [X] Implementar metodo render
- * - [ ] Implementar groups (childrens)
+ * - [X] Implementar groups (childrens)
  * - [ ] Refatorar add routes (add no init)
  * - [ ] Implementar opção de component fail default a nível de grupo ou global
  * - [ ] Implementar lang para mensagens
@@ -155,12 +155,16 @@ export function Router(props={}){
             route.handler = handler;
             route.parameters = Core.proccessParameters(route.uri);
             route = Core.proccessRegExp(route);
-      
+
             Core.routes.push(route);
             Core.uris.push(uri);
 
-            console.log("[Route]", route);
-
+            if ( group.length ){
+                group.forEach(function(chilRoute){
+                    chilRoute.path = uri + chilRoute.path;
+                    Core.get(chilRoute);
+                });
+            }
         },
 
         run: function(){
@@ -261,7 +265,7 @@ export function Router(props={}){
       
             if ( !Core.containsParameter(uri) ) return parameters;
 
-            uri.replace(/\{\w+\}/g,(parameter)=>{
+            uri.replace(/\{\w+\}/g, (parameter)=>{
                 sn++;
                 parameter.replace(/\w+/, (parameterName)=>{
                     let obj = {};
@@ -316,7 +320,7 @@ export function Router(props={}){
 
             let param = {};
             routeMatched.forEach((value, index)=>{
-                if(index !== 0){
+                if ( index !== 0 ){
                     let key = Object.getOwnPropertyNames(route.parameters[index - 1]);
                     param[key] = value;
                 }
@@ -363,7 +367,7 @@ export function Router(props={}){
 
             let componentData = component;
             let setComponent = (response={}) => Core.set({
-                component: response[methodName].bind(null, state.route)
+                component: response[methodName].bind(null, state.route.request)
             });
 
             return component = () => {
@@ -387,7 +391,7 @@ export function Router(props={}){
                         })
 
                         Core.set({
-                            component: FailComponent.bind(null, state.route)
+                            component: FailComponent.bind(null, state.route.request)
                         });
                 });
                 

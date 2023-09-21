@@ -17,8 +17,36 @@ export default function Sidebar(props={}){
                 $("<li>", {
                     class: "list-group-item",
                     html: Link({
-                        href: "/category",
+                        href: "/category/category-slug",
                         html: "Categoria"
+                    })
+                }),
+                $("<li>", {
+                    class: "list-group-item",
+                    html: Link({
+                        href: "/pedidos",
+                        html: "Pedidos"
+                    })
+                }),
+                $("<li>", {
+                    class: "list-group-item",
+                    html: Link({
+                        href: "/pedidos/filter",
+                        html: "-- Pedidos filtro"
+                    })
+                }),
+                $("<li>", {
+                    class: "list-group-item",
+                    html: Link({
+                        href: "/pedidos/123",
+                        html: "-- Pedido 123"
+                    })
+                }),
+                $("<li>", {
+                    class: "list-group-item",
+                    html: Link({
+                        href: "/pedidos/123/imprimir",
+                        html: "---- Imprimir pedido 123"
                     })
                 }),
                 $("<li>", {
