@@ -137,7 +137,9 @@ export function Router(props={}){
          * @param {object} props 
          * @param {string} props.path
          * @param {object|function} props.handler
-         * @param {array} props.group
+         * @param {object} props.group
+         * @param {array} props.group.routes
+         * @param {function} props.group.placeholder
          */
         get: function(props={}){
 
