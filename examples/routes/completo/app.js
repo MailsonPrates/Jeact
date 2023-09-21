@@ -69,14 +69,12 @@ export default function App(){
             },
             {
                 /**
-                 * Template diferente
+                 * @example Template diferente
                  */
                 path: "/login",
-                handler: (req) => state.set("route", {
-                    request: req,
-                    title: "Login",
-                    component: Login.bind(this, req)
-                })
+                handler: {
+                    component: Login
+                }
             }
 
         ]
