@@ -11,6 +11,9 @@
  * - [ ] Implementar hook para import com erro
  * - [ ] Implementar componente de placeholder default a nivel de de rota ou global
  * - [X] Implementar opção de delay minimo para os componentes dinamicos
+ * - [ ] Implementar método customizado para o import dinamico (diferente de default)
+ * - [ ] Implementar alteração do titulo da janela
+ * - [ ] Implementar título com parametros
  */
 
 import { State } from "../jeact.js";
@@ -114,7 +117,17 @@ export function Router(props={}){
             Core.query = Query.get();
         },
 
-        get: function(uri, handler){
+        /**
+         * @param {object} props 
+         * @param {string} props.uri
+         * @param {object|function} props.handler
+         * @param {array} props.group
+         */
+        get: function(props={}){
+
+            let uri = props.path;
+            let handler = props.handler;
+            let group = props.group || [];
 
             if ( !uri || typeof uri != "string" ) return;
       
@@ -124,7 +137,8 @@ export function Router(props={}){
                 parameters: null,
                 regExp: null,
                 name: null,
-                current: false
+                current: false,
+                group: group
             }
       
             if ( Configs.caseInsensitive ) {
@@ -140,17 +154,17 @@ export function Router(props={}){
             route.uri = uri;
             route.handler = handler;
             route.parameters = Core.proccessParameters(route.uri);
+            route = Core.proccessRegExp(route);
       
             Core.routes.push(route);
             Core.uris.push(uri);
+
+            console.log("[Route]", route);
+
         },
 
         run: function(){
 
-            Core.routes.forEach((route)=>{
-                Core.proccessRegExp(route);
-            });
-      
             let found = false;
     
             /**
@@ -388,7 +402,8 @@ export function Router(props={}){
                 get: Core.get,
                 run: Core.run,
                 goTo: Core.goTo,
-                render: Core.render
+                render: Core.render,
+                _core: Core
             };
         },
 
@@ -401,7 +416,7 @@ export function Router(props={}){
     if ( hasRoutesOnInit ){
 
         Configs.routes.forEach(function(route){
-            Core.get(route.path, route.handler);
+            Core.get(route);
         });
 
         Core.run();
