@@ -33,7 +33,7 @@ export function Router(props={}){
         fallback: "",
         routes: [],
         importMethod: null,
-        importDelay: 1000
+        importDelay: 200
     }, props);
 
     const state = State({
