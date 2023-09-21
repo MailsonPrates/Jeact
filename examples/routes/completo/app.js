@@ -5,8 +5,6 @@ import Category from "./pages/category.js";
 import Placeholder from "./components/placeholder.js";
 import Login from "./pages/login.js";
 
-console.log("[App] //");
-
 /**
  * 
  * @todo
@@ -19,60 +17,55 @@ export default function App(){
     console.log("[App]");
 
     const state = State({
-        route: {}
     }, "global");
 
-    const DefaultPlaceholder = () => {
-        console.log("Defalt");
+    const DefaultPlaceholder = (route) => {
+        console.log("[Default]", route);
 
         return $("<div>", {
-            html: state.route.component || "Loading..."
+            html: route.component.bind(null, route.request) || "Loading..."
         });
     }
 
-    Router({
+    return Router({
         routes: [
             {
+                /**
+                 * @example Handler como função
+                 */
                 path: "/", 
-                handler: (req) => state.set("route", {
-                    request: req,
+                handler: (req, route) => route.set({
                     title: "Home",
-                    component: Home.bind(this, {req, title: "Home"})
-                })
-            },
-            {
-                path: "/category", 
-                handler: (req) => state.set("route", {
-                    request: req,
-                    title: "Category",
-                    component: Category.bind(this, {req, title: "Category"})
+                    component: Home
                 })
             },
             {
                 /**
-                 * Dinamico
+                 * @example Handler como objeto
+                 */
+                path: "/category", 
+                handler: {
+                    title: "Category",
+                    component: Category
+                }
+            },
+            {
+                /**
+                 * @example Handler com componente dinamico
+                 * @todo
+                 * - Implementar componente de erro customizado
+                 * - Implementar placeholder filename
+                 * - Implementar método import customizado
                  */
                 path: "/contact", 
-                handler: (req) => state.set("route", {
-                    request: req,
+                handler: {
                     title: "Contact",
-                    component: function(){
-
-                        import("./pages/contact.js")
-                            .then(function(module){
-                                setTimeout(function(){
-                                    
-                                    state.set("route", {
-                                        request: req,
-                                        title: "Contact",
-                                        component: module.default.bind(this, {req, title: "Contact"})
-                                    });
-                                }, 2000)
-                            });
-
-                        return Placeholder();
+                    component: {
+                        filename: "/Dev/Jeact/Jeact/examples/routes/completo/pages/contact.js",
+                        placeholder: Placeholder,
+                        //fail: Fail
                     }
-                })
+                }
             },
             {
                 /**
@@ -87,9 +80,7 @@ export default function App(){
             }
 
         ]
-    });
-
-    $.router.goTo("/");
-
-    return state.render(DefaultPlaceholder);
+    })
+    .goTo("/")
+    .render(DefaultPlaceholder);
 }

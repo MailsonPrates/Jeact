@@ -1,6 +1,19 @@
 /**
  * @ref https://github.com/kodnificent/sparouter
+ * 
+ * @todo
+ * - [X] Implementar State proprio
+ * - [X] Implementar metodo render
+ * - [ ] Implementar groups (childrens)
+ * - [ ] Refatorar add routes (add no init)
+ * - [ ] Implementar opção de component fail default a nível de grupo ou global
+ * - [ ] Implementar lang para mensagens
+ * - [ ] Implementar hook para import com erro
+ * - [ ] Implementar componente de placeholder default a nivel de de rota ou global
+ * - [X] Implementar opção de delay minimo para os componentes dinamicos
  */
+
+import { State } from "../jeact.js";
 
 export function Router(props={}){
 
@@ -8,10 +21,14 @@ export function Router(props={}){
         historyMode: true,
         caseInsensitive: true,
         fallback: "",
-        routes: []
+        routes: [],
+        importMethod: null,
+        importDelay: 1000
     }, props);
 
-    //const RouteState = State({});
+    const state = State({
+        route: {}
+    });
 
     const Query = {
 
@@ -87,14 +104,13 @@ export function Router(props={}){
             Core.query = Query.get();
         },
 
-        get: function(uri, callback){
+        get: function(uri, handler){
 
             if ( !uri || typeof uri != "string" ) return;
-            if ( typeof callback != "function") return;
       
             let route = {
                 uri: null,
-                callback: null,
+                handler: null,
                 parameters: null,
                 regExp: null,
                 name: null,
@@ -112,7 +128,7 @@ export function Router(props={}){
             if ( uriAlreadyExist ) return;
       
             route.uri = uri;
-            route.callback = callback;
+            route.handler = handler;
             route.parameters = Core.proccessParameters(route.uri);
       
             Core.routes.push(route);
@@ -127,6 +143,9 @@ export function Router(props={}){
       
             let found = false;
     
+            /**
+             * @todo refatorar - salvar obj com path pra acessa direto
+             */
             Core.routes.some((route)=>{
 
                 if ( Core.requestPath().match(route.regExp) ) {
@@ -138,13 +157,21 @@ export function Router(props={}){
                     request.query = Core.query;
                     request.uri = window.location.pathname;
       
-                    return route.callback(request);
+                    state.route.request = request;
+
+                    if ( typeof route.handler == "function" ) 
+                        return route.handler(request, {set: Core.set});
+
+                    if ( $.type(route.handler) == "object" ) 
+                        return Core.set(route.handler);
+
+                    return Core.api();
                 }
             })
       
             if ( !found ){
 
-                if ( !Configs.fallback ) return;
+                if ( !Configs.fallback ) return Core.api();
 
                 let request = {};
                 request.uri = window.location.pathname;
@@ -155,7 +182,7 @@ export function Router(props={}){
 
         goTo: function(url, data = {}, title =""){
 
-            if ( !url || typeof url != "string" ) return;
+            if ( !url || typeof url != "string" ) return Core.api();
       
             if ( !Configs.historyMode ){
                 let storage = window.localStorage;
@@ -165,7 +192,43 @@ export function Router(props={}){
       
             window.history.pushState(data, title, url);
             Core.query = Query.get();
-            return Core.run();
+            Core.run();
+
+            return Core.api();
+        },
+
+        /**
+         * Renderiza componente da rota
+         * @param {object|function} component 
+         * @param {string} component.filename
+         * @param {string|function} component.placeholder
+         * 
+         */
+        render: function(component=null){
+
+            console.log("[Router] render", state);
+
+            return typeof component == "function" 
+                && state.render(component.bind(null, state.route));
+        },
+
+        /**
+         * Ativa rota no state
+         * @param {object} props
+         * @param {function|object} props.component
+         * @param {string} props.title
+         */
+        set: function(props={}){
+            let routeData = $.extend(true, state.route, props);
+            routeData.request.title = routeData.title;
+
+            let isDynamicComponent = $.type(routeData.component) == "object";
+
+            routeData.component = isDynamicComponent
+                ? Core.buildDynamicComponent(routeData.component)
+                : routeData.component;
+
+            return state.set("route", routeData);
         },
 
         proccessParameters: function(uri){
@@ -258,7 +321,67 @@ export function Router(props={}){
                 Core.query = Query.get();
                 Core.run();
             });
-        }
+        },
+
+        /**
+         * @param {object} componentData 
+         * @returns {function}
+         */
+        buildDynamicComponent: function(component={}){
+
+            /**
+             * @todo lidar com validacoes e erros
+             */
+
+            let methodName = "default";
+            let hasFailComponent = typeof component.fail == "function";
+            let hasPlaceholderComponent = typeof component.placeholder == "function";
+
+            let componentData = component;
+            let setComponent = (response={}) => Core.set({
+                component: response[methodName].bind(null, state.route)
+            });
+
+            return component = () => {
+                import(componentData.filename)
+                .then(function(response){
+
+                    if ( Configs.importDelay !== false ) 
+                        return setTimeout(setComponent.bind(null, response), Configs.importDelay);
+
+                }).catch(err => {
+                    let message = err.message || "";
+                    let FailComponent = hasFailComponent 
+                        ? componentData.fail
+                        /** @todo importar componente default de fail */
+                        : () => $("<div>", {
+                            class: "alert alert-danger", 
+                            html: [
+                                "Ops! Houve um erro, atualize a página e tente novamente",
+                                $("<small>", {text: message})
+                            ]
+                        })
+
+                        Core.set({
+                            component: FailComponent.bind(null, state.route)
+                        });
+                });
+                
+                return hasPlaceholderComponent 
+                    ? componentData.placeholder()
+                    : $("<div>", {text: "Carregando..."});
+            };
+        },
+
+        api: function(){
+            return {
+                get: Core.get,
+                run: Core.run,
+                goTo: Core.goTo,
+                render: Core.render
+            };
+        },
+
     };
     
     Core.init();
@@ -274,11 +397,7 @@ export function Router(props={}){
         Core.run();
     }
 
-    let api = {
-        get: Core.get,
-        run: Core.run,
-        goTo: Core.goTo
-    };
+    let api = Core.api();
     
     $.router = api;
 
