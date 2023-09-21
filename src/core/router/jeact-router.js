@@ -5,7 +5,7 @@
  * - [X] Implementar State proprio
  * - [X] Implementar metodo render
  * - [X] Implementar groups (childrens)
- * - [ ] Refatorar add routes (add no init)
+ * - [X] Refatorar add routes (add no init)
  * - [ ] Implementar opção de component fail default a nível de grupo ou global
  * - [ ] Implementar lang para mensagens
  * - [ ] Implementar hook para import com erro
@@ -115,6 +115,18 @@ export function Router(props={}){
         init: function(){
             Core.initHistoryMode();
             Core.query = Query.get();
+
+            let hasRoutesOnInit = Configs.routes.length; 
+
+            if ( hasRoutesOnInit ){
+
+                Configs.routes.forEach(function(route){
+                    Core.get(route);
+                });
+
+                Core.run();
+            }
+
         },
 
         /**
@@ -157,7 +169,8 @@ export function Router(props={}){
 
                     let hasGroupPlaceholder = group.placeholder 
                         && chilRoute.handler 
-                        && $.type(chilRoute.handler.component) == "object";
+                        && $.type(chilRoute.handler.component) == "object"
+                        && !chilRoute.handler.component.placeholder;
 
                     if ( hasGroupPlaceholder ){
                         chilRoute.handler.component.placeholder = group.placeholder;
@@ -421,25 +434,13 @@ export function Router(props={}){
                 get: Core.get,
                 run: Core.run,
                 goTo: Core.goTo,
-                render: Core.render,
-                _core: Core
+                render: Core.render
             };
-        },
+        }
 
     };
     
     Core.init();
-
-    let hasRoutesOnInit = Configs.routes.length; 
-
-    if ( hasRoutesOnInit ){
-
-        Configs.routes.forEach(function(route){
-            Core.get(route);
-        });
-
-        Core.run();
-    }
 
     let api = Core.api();
     

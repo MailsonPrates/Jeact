@@ -3,6 +3,7 @@ import { State } from "../../../src/core/jeact.js";
 import Home from "./pages/home.js";
 import Category from "./pages/category.js";
 import Placeholder from "./components/placeholder.js";
+import OtherPlaceholder from "./components/other-placeholder.js";
 import Login from "./pages/login.js";
 
 /**
@@ -81,46 +82,52 @@ export default function App(){
             },
             {
                 /**
-                 * @example Rotas filhas agrupadas
+                 * @example Rotas agrupadas
                  */
                 path: "/pedidos",
-                handler: {
-                    component: {
-                        filename: getPath("pedido-lista"),
-                        placeholder: Placeholder
-                    },
-                    title: "Pedidos"
-                },
-                group: [
-                    {
-                        path: "/{id}",
-                        handler: {
-                            component: {filename: getPath("pedido-detalhes")},
-                            title: "Pedido detalhes"
+                group: {
+                    placeholder: Placeholder,
+                    routes: [
+                        {
+                            path: "/",
+                            handler: {
+                                component: {
+                                    filename: getPath("pedido-lista")
+                                },
+                                title: "Pedidos"
+                            },
                         },
-                        group: [
-                             /**
-                             * @example nested
+                        {
+                            path: "/{id}",
+                            handler: {
+                                component: {filename: getPath("pedido-detalhes")},
+                                title: "Pedido detalhes"
+                            }
+                        },
+                        {
+                            /**
+                             * @example Ignore group placeholder
                              */
-                            {
-                                path: "/imprimir",
-                                handler: {
-                                    component: {filename: getPath("pedido-imprimir")},
-                                    title: "Imprimir pedido"
+                            path: "/{id}/imprimir",
+                            handler: {
+                                component: {
+                                    filename: getPath("pedido-imprimir"),
+                                    placeholder: OtherPlaceholder
+                                },
+                                title: "Imprimir pedido"
+                            }
+                        },
+                        {
+                            path: "/filter",
+                            handler: {
+                                component: {
+                                    filename: getPath("pedido-filter")
                                 }
                             }
-                        ]
-                    },
-                    {
-                        path: "/filter",
-                        handler: {
-                            component: {
-                                filename: getPath("pedido-filter")
-                            }
+    
                         }
-
-                    }
-                ]
+                    ]
+                }
             }
 
         ]
