@@ -458,9 +458,17 @@ export function Router(props={}){
 /**
  * @param {object} props attrs
  * @returns {jQuery} <a> element
+ * 
+ * @todo
+ * - [] Ao clicar no link, o scroll precisa subir para o topo
  */
 export function Link(props={}){
     let propsClick = props.click;
+
+    // Remove props nao utilizadas
+    // na construcao do elemento
+    // ou que terá comportamento 
+    // alterado
     delete props.click;
 
     let $link = $("<a>", props);
