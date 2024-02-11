@@ -1,5 +1,4 @@
-import { Router } from "../../../src/core/router/jeact-router.js";
-import { State } from "../../../src/core/jeact.js";
+import { State, Router } from "/src/index.js";
 import Home from "./pages/home.js";
 import Category from "./pages/category.js";
 import Placeholder from "./components/placeholder.js";
@@ -22,7 +21,7 @@ export default function App(){
     }
 
     // local only
-    const root = "/Dev/Jeact/Jeact/examples/routes/completo";
+    const root = "/examples/routes/multiples";
     const getPath = (path) => `${root}${path}`;
     const getFilePath= (filename) => getPath(`/pages/${filename}.js`);
     const indexRoute = window.location.pathname.replace(root, "");

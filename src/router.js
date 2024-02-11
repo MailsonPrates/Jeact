@@ -20,7 +20,7 @@
  * - [ ] Implementar título com parametros
  */
 
-import { State } from "../jeact.js";
+import State from "./state.js";
 
 /**
  * @param {object} props
@@ -33,7 +33,7 @@ import { State } from "../jeact.js";
  * 
  * @returns {Router}
  */
-export function Router(props={}){
+export default function Router(props={}){
 
     const Configs = $.extend(true, {
         root: false,
@@ -222,7 +222,7 @@ export function Router(props={}){
                     request.query = Core.query;
                     request.uri = window.location.pathname;
       
-                    state.route.request = request;
+                    state.get("route").request = request;
 
                     if ( typeof route.handler == "function" ) 
                         return route.handler(request, {set: Core.set});
@@ -278,7 +278,7 @@ export function Router(props={}){
             console.log("[Router] render", state);
 
             return typeof component == "function" 
-                && state.render(component.bind(null, state.route));
+                && state.render(component.bind(null, state.get("route")));
         },
 
         /**
@@ -288,7 +288,7 @@ export function Router(props={}){
          * @param {string} props.title
          */
         set: function(props={}){
-            let routeData = $.extend(true, state.route, props);
+            let routeData = $.extend(true, state.get("route"), props);
             routeData.request.title = routeData.title;
 
             let isDynamicComponent = $.type(routeData.component) == "object";
@@ -412,7 +412,7 @@ export function Router(props={}){
 
             let componentData = component;
             let setComponent = (response={}) => Core.set({
-                component: response[methodName].bind(null, state.route.request)
+                component: response[methodName].bind(null, state.get("route").request)
             });
 
             return component = () => {
@@ -436,7 +436,7 @@ export function Router(props={}){
                         })
 
                         Core.set({
-                            component: FailComponent.bind(null, state.route.request)
+                            component: FailComponent.bind(null, state.get("route").request)
                         });
                 });
                 
@@ -464,38 +464,4 @@ export function Router(props={}){
     $.router = api;
 
     return api;
-}
-
-/**
- * @param {object} props attrs
- * @returns {jQuery} <a> element
- * 
- * @todo
- * - [] Ao clicar no link, o scroll precisa subir para o topo
- */
-export function Link(props={}){
-    let propsClick = props.click;
-
-    // Remove props nao utilizadas
-    // na construcao do elemento
-    // ou que terá comportamento 
-    // alterado
-    delete props.click;
-
-    let $link = $("<a>", props);
-
-    $link.on("click", function(e){
-        
-        e.preventDefault();
-
-        window.scrollTo({top: 0, behavior: 'smooth'});
-
-        if ( props.href ){                
-            $.router.goTo(props.href, {}, props.title || "");
-        }
-
-        typeof propsClick == "function" && propsClick.call($link);
-    });
-
-    return $link;
 }
