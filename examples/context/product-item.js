@@ -1,10 +1,12 @@
-import { State, Context } from "../../src/core/jeact.js"
+import { State } from "/src/index.js"
 
 export default function ProductItem(props={}){
 
     const state = State({
         adding: false
     });
+
+    const cartContext = State("cart");
 
     const requestAdd = () => {
         return new Promise(function(resolve){
@@ -16,8 +18,8 @@ export default function ProductItem(props={}){
         });
     }
 
-    const Item = () => $("<div>", {
-        "data-id": props.id,
+    const Item = ({adding}) => $("<div>", {
+        "key": props.id,
         class: "col border m-1",
         html: $("<div>", {
             class: "p-3",
@@ -27,8 +29,8 @@ export default function ProductItem(props={}){
                     html: props.name
                 }),
                 $("<div>", {
-                    class: "mt-3 btn btn-primary"+(state.adding ? " disabled" : ""),
-                    html: state.adding ? "Aguarde..." : "Adicionar",
+                    class: "mt-3 btn btn-primary"+(adding ? " disabled" : ""),
+                    html: adding ? "Aguarde..." : "Adicionar",
                     click: async () => {
                         state.set("adding", true);
                         console.log("[Add to cart] processing...");
@@ -38,10 +40,7 @@ export default function ProductItem(props={}){
                         state.set("adding", false);
                         console.log("[Add to cart] success!");
 
-                        const contextState = Context.get("cart");
-                        const quantity = contextState.quantity + 1;
-
-                        contextState.set("quantity", quantity);
+                        cartContext.set("quantity", quantity => quantity+1);
                     }
                 })
             ]

@@ -1,4 +1,4 @@
-import { Link } from "../../../../src/core/router/jeact-router.js";
+import { Link } from "/src/index.js";
 
 export default function Login(){
 
