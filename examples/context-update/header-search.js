@@ -66,9 +66,15 @@ export default function HeaderSearch(){
             }),
             state.data.length 
                 ? $("<div>", {
+                id: "result",
                 class: "mt-1 border-top p-3",
-                html: "produtos produtos proditus produtos<br>produtos produtos proditus produtos"
-            }) : ""
+                html: "produtos produtos proditus produtos<br>produtos produtos proditus produtos",
+                click: function(){console.log("click produtos")}
+            }) : $("<div>", {
+                html: "vazio",
+                id: "empty-result",
+                click: function(){console.log("click vazio")}
+            })
         ]
     })
 

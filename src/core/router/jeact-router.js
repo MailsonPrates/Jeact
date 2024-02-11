@@ -24,6 +24,7 @@ import { State } from "../jeact.js";
 
 /**
  * @param {object} props
+ * @param {string} props.root
  * @param {bool} props.historyMode
  * @param {bool} props.caseInsensitive
  * @param {string} props.fallback
@@ -35,6 +36,7 @@ import { State } from "../jeact.js";
 export function Router(props={}){
 
     const Configs = $.extend(true, {
+        root: false,
         historyMode: true,
         caseInsensitive: true,
         fallback: "",
@@ -204,13 +206,14 @@ export function Router(props={}){
         run: function(){
 
             let found = false;
-    
+
             /**
              * @todo refatorar - salvar obj com path pra acessa direto
              */
             Core.routes.some((route)=>{
 
                 if ( Core.requestPath().match(route.regExp) ) {
+
                     route.current = true;
                     found = true;
       
@@ -245,6 +248,10 @@ export function Router(props={}){
         goTo: function(url, data = {}, title =""){
 
             if ( !url || typeof url != "string" ) return Core.api();
+
+            url = Configs.root 
+                ? `${Configs.root}${url}` 
+                : url;
       
             if ( !Configs.historyMode ){
                 let storage = window.localStorage;
@@ -317,7 +324,11 @@ export function Router(props={}){
 
         proccessRegExp: function(route){
             let regExp = route.uri;
-  
+
+            regExp = Configs.root 
+                ? `${Configs.root}${regExp}` 
+                : regExp;
+
             // escape special characters
             regExp = regExp.replace(/\//g, "\\/");
             regExp = regExp.replace(/\./g, "\\.");
@@ -477,11 +488,13 @@ export function Link(props={}){
         
         e.preventDefault();
 
+        window.scrollTo({top: 0, behavior: 'smooth'});
+
         if ( props.href ){                
             $.router.goTo(props.href, {}, props.title || "");
         }
 
-        typeof propsClick == "function" && propsClick();
+        typeof propsClick == "function" && propsClick.call($link);
     });
 
     return $link;

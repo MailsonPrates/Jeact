@@ -22,9 +22,15 @@ export default function App(){
     }
 
     // local only
-    const getPath = (filename) => `/Dev/Jeact/Jeact/examples/routes/completo/pages/${filename}.js`;
+    const root = "/Dev/Jeact/Jeact/examples/routes/completo";
+    const getPath = (path) => `${root}${path}`;
+    const getFilePath= (filename) => getPath(`/pages/${filename}.js`);
+    const indexRoute = window.location.pathname.replace(root, "");
+
+    console.log({indexRoute})
 
     return Router({
+        root: root,
         routes: [
             {
                 /**
@@ -54,7 +60,7 @@ export default function App(){
                 handler: {
                     title: "Contact",
                     component: {
-                        filename: getPath("contact"),
+                        filename: getFilePath("contact"),
                         placeholder: Placeholder,
                         //fail: Fail
                     }
@@ -81,7 +87,7 @@ export default function App(){
                             path: "/",
                             handler: {
                                 component: {
-                                    filename: getPath("pedido-lista")
+                                    filename: getFilePath("pedido-lista")
                                 },
                                 title: "Pedidos"
                             },
@@ -89,7 +95,7 @@ export default function App(){
                         {
                             path: "/{id}",
                             handler: {
-                                component: {filename: getPath("pedido-detalhes")},
+                                component: {filename: getFilePath("pedido-detalhes")},
                                 title: "Pedido detalhes"
                             }
                         },
@@ -100,7 +106,7 @@ export default function App(){
                             path: "/{id}/imprimir",
                             handler: {
                                 component: {
-                                    filename: getPath("pedido-imprimir"),
+                                    filename: getFilePath("pedido-imprimir"),
                                     placeholder: OtherPlaceholder
                                 },
                                 title: "Imprimir pedido"
@@ -110,7 +116,7 @@ export default function App(){
                             path: "/filter",
                             handler: {
                                 component: {
-                                    filename: getPath("pedido-filter")
+                                    filename: getFilePath("pedido-filter")
                                 }
                             }
     
@@ -121,6 +127,6 @@ export default function App(){
 
         ]
     })
-    .goTo("/")
+    .goTo(indexRoute)
     .render(DefaultPlaceholder);
 }

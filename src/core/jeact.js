@@ -34,10 +34,14 @@ export function State(initialState, contextName=null){
     pair = {
         ...initialState, 
 
+        /**
+         * When the user requests a state change,
+         * put the new value into the pair.
+         * 
+         * @param {string} prop 
+         * @param {mixed} value 
+         */
         set: function(prop, value) {
-            // When the user requests a state change,
-            // put the new value into the pair.
-            //pair[0] = nextState;
             pair[prop] = value;
             $(pair).trigger("change");
         },
