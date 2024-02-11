@@ -20,7 +20,7 @@
  * - [ ] Implementar título com parametros
  */
 
-import { State } from "../jeact.js";
+import { State } from "./state";
 
 /**
  * @param {object} props

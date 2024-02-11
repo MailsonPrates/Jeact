@@ -1,4 +1,4 @@
-import { Router } from "../../../src/core/router/jeact-router.js";
+import { Router } from "../../../src/router.js";
 import { State } from "../../../src/core/jeact.js";
 import Home from "./pages/home.js";
 import Category from "./pages/category.js";
