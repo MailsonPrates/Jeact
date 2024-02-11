@@ -2,9 +2,9 @@
  * @version 0.1.0
  */
 
-import SyncDOM from "./syncDOM";
-import Context from "./context";
-import core from "./core";
+import SyncDOM from "./syncDOM.js";
+import Context from "./context.js";
+import core from "./core.js";
 
 let componentHooks = [];
 let currentHookIndex = 0;

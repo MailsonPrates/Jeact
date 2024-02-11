@@ -1,5 +1,4 @@
 import CartHead from "./header-cart.js";
-import { Context } from "../../src/core/jeact.js";
 import HeaderSearch from "./header-search.js";
 
 export default function Header(props={}){
@@ -23,7 +22,7 @@ export default function Header(props={}){
                         $("<div>", {
                             class: "col",
                             html: CartHead({
-                                quantity: Context.get("cart", "quantity")
+                                quantity: props.cartQuantity
                             })
                         })
                     ]
