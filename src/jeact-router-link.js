@@ -18,12 +18,24 @@ export default function Link(props={}){
 
     $link.on("click", function(e){
         
+        if ( !$.router ) return;
+
         e.preventDefault();
 
         window.scrollTo({top: 0, behavior: 'smooth'});
 
-        if ( props.href ){                
-            $.router.goTo(props.href, {}, props.title || "");
+        let href = props.href;
+
+        if ( href ){        
+            
+            // Add / no final
+            href = href.endsWith('/') || href.includes("/?")
+                ? href
+                : href.includes("?")
+                    ? href.replace('?', '/?')
+                    : href + "/";
+                    
+            $.router.goTo(href, {}, props.title || "");
         }
 
         typeof propsClick == "function" && propsClick.call($link);

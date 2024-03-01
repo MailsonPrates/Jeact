@@ -5,6 +5,9 @@
 import SyncDOM from "./syncDOM.js";
 import Context from "./context.js";
 import core from "./core.js";
+import JeactDOM from "./jeact-dom.js";
+
+JeactDOM();
 
 let componentHooks = [];
 let currentHookIndex = 0;

@@ -1,9 +1,11 @@
-import { State, Router } from "/src/index.js";
+import { State, Router, Jeact } from "/src/index.js";
 import Home from "./pages/home.js";
 import Category from "./pages/category.js";
 import Placeholder from "./components/placeholder.js";
 import OtherPlaceholder from "./components/other-placeholder.js";
 import Login from "./pages/login.js";
+
+Jeact();
 
 export default function App(){
 
