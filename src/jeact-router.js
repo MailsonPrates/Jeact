@@ -397,7 +397,7 @@ export default function Router(props={}){
 
             if ( uriAlreadyExist ) return;
       
-            route.uri = uri;
+            route.path = uri;
             route.handler = handler;
             route.parameters = Core.proccessParameters(route.uri);
             route = Core.proccessRegExp(route);
