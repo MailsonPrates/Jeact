@@ -361,7 +361,8 @@ export default function Router(props={}){
                 regExp: null,
                 name: null,
                 current: false,
-                group: group
+                group: group,
+                data: props.data
             }
       
             if ( Configs.caseInsensitive ) {
@@ -463,7 +464,8 @@ export default function Router(props={}){
             route.current = true;
 
             let request = {};
-            request.param = Core.processRequestParameters(route);
+            request.params = Core.processRequestParameters(route);
+            request.data = route.data;
             request.query = Core.query;
             request.uri = path;
 
