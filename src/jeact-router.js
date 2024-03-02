@@ -297,7 +297,7 @@ export default function Router(props={}){
             fixed: {},
             variable: {}
         },
-        uris: [],
+        paths: [],
         path: "",
         query: {},
 
@@ -347,36 +347,36 @@ export default function Router(props={}){
          */
         get: function(props={}){
 
-            let uri = props.path;
+            let path = props.path;
             let handler = props.handler;
             let group = props.group || {routes: []};
             let hasGroup = group.routes.length;
 
-            if ( !uri || typeof uri != "string" ) return;
+            if ( !path || typeof path != "string" ) return;
       
             let route = {
-                uri: null,
+                path: null,
                 handler: null,
                 parameters: null,
                 regExp: null,
                 name: null,
                 current: false,
                 group: group,
-                data: props.data
+                route_data: props.data
             }
       
             if ( Configs.caseInsensitive ) {
-                uri = uri.toLowerCase()
+                path = path.toLowerCase()
             };
 
-            uri = uri.startsWith("/") ? uri : `/${uri}`;
+            path = path.startsWith("/") ? path : `/${path}`;
 
             if ( hasGroup ){
 
                 group.routes.forEach(function(chilRoute){
                     
                     let isSlashPath = chilRoute.path == "/";
-                    chilRoute.path = isSlashPath ? uri : (uri + chilRoute.path);
+                    chilRoute.path = isSlashPath ? path : (path + chilRoute.path);
 
                     let hasGroupPlaceholder = group.placeholder 
                         && chilRoute.handler 
@@ -393,18 +393,18 @@ export default function Router(props={}){
                 return;
             }
 
-            let uriAlreadyExist = Core.uris.indexOf(uri) !== -1;
+            let pathAlreadyExist = Core.paths.indexOf(path) !== -1;
 
-            if ( uriAlreadyExist ) return;
+            if ( pathAlreadyExist ) return;
       
-            route.path = uri;
+            route.path = path;
             route.handler = handler;
-            route.parameters = Core.proccessParameters(route.uri);
+            route.parameters = Core.proccessParameters(route.path);
             route = Core.proccessRegExp(route);
 
             Core.routes.push(route);
             Core.setIndex(route);
-            Core.uris.push(uri);
+            Core.paths.push(path);
         },
 
         run: function(){
@@ -451,7 +451,7 @@ export default function Router(props={}){
                 if ( !Configs.fallback ) return Core.goTo("/404");
 
                 let request = {};
-                request.uri = window.location.pathname;
+                request.path = window.location.pathname;
 
                 return Core.goTo(Configs.fallback);
             }
@@ -465,9 +465,9 @@ export default function Router(props={}){
 
             let request = {};
             request.params = Core.processRequestParameters(route);
-            request.data = route.data;
+            request.route_data = route.route_data;
             request.query = Core.query;
-            request.uri = path;
+            request.path = path;
 
             state.get("route").request = request;
 
@@ -545,16 +545,16 @@ export default function Router(props={}){
 
         setIndex: route => {
 
-            let uri = route.uri;
-            let isVariable = uri.includes("{");
+            let path = route.path;
+            let isVariable = path.includes("{");
 
             if ( !isVariable ){
-                Core.routesIndex.fixed[uri] = route;
+                Core.routesIndex.fixed[path] = route;
                 return;
             }
 
-            let uriParts = uri.split("/");
-            let group = uriParts[1] || '/';
+            let pathParts = path.split("/");
+            let group = pathParts[1] || '/';
 
             if ( !Core.routesIndex.variable[group] ){
                 Core.routesIndex.variable[group] = [];
@@ -563,13 +563,13 @@ export default function Router(props={}){
             Core.routesIndex.variable[group].push(route);
         },
 
-        proccessParameters: function(uri){
+        proccessParameters: function(path){
             let parameters = [];
             let sn = 0;
       
-            if ( !Core.containsParameter(uri) ) return parameters;
+            if ( !Core.containsParameter(path) ) return parameters;
 
-            uri.replace(/\{\w+\}/g, (parameter)=>{
+            path.replace(/\{\w+\}/g, (parameter)=>{
                 sn++;
                 parameter.replace(/\w+/, (parameterName)=>{
                     let obj = {};
@@ -586,7 +586,7 @@ export default function Router(props={}){
         },
 
         proccessRegExp: function(route){
-            let regExp = route.uri;
+            let regExp = route.path;
 
             regExp = Configs.root 
                 ? `${Configs.root}${regExp}` 
@@ -597,9 +597,9 @@ export default function Router(props={}){
             regExp = regExp.replace(/\./g, "\\.");
             regExp = regExp.replace("/", "/?");
       
-            if ( Core.containsParameter(route.uri) ){
+            if ( Core.containsParameter(route.path) ){
       
-                //replace uri parameters with their regular expression
+                //replace path parameters with their regular expression
                 regExp.replace(/{\w+}/g, (parameter)=>{
                     let parameterName = parameter.replace("{","");
                     parameterName = parameterName.replace("}","");
@@ -637,8 +637,8 @@ export default function Router(props={}){
             return param;
         },        
               
-        containsParameter: function(uri){
-            return uri.search(/{\w+}/g) >= 0;
+        containsParameter: function(path){
+            return path.search(/{\w+}/g) >= 0;
         },
 
         requestPath: function(){
@@ -779,7 +779,7 @@ export default function Router(props={}){
                     title: "Componente não encontrado",
                     description: `Componente <i>main</i> da rota não foi encontrado`,
                     solutions: [
-                        `Verifique na configuração das rotas, se foi infomado o componente 'main' para a rota ${request.uri}`
+                        `Verifique na configuração das rotas, se foi infomado o componente 'main' para a rota ${request.path}`
                     ]
                 }
             };
