@@ -32,6 +32,7 @@ import State from "./jeact-state.js";
  * @param {int} props.importDelay
  * @param {string} props.error visible|log|none
  * @param {bool} props.debug
+ * @param {bool} props.env
  * 
  * @returns {Router}
  */
@@ -48,7 +49,8 @@ export default function Router(props={}){
         importMethod: null,
         importDelay: 200,
         error: 'visible',
-        debug: false
+        debug: false,
+        env: 'dev'
     }, props);
 
     const state = State({
@@ -153,42 +155,12 @@ export default function Router(props={}){
             })
         }),
 
-        fail: error => $.div({
-            css: {
-                'padding': '10px',
-                'background': '#ffe8e8',
-                'color': '#941818',
-                'border-radius': '7px',
-                'margin': '5px'
-            },
-            html: [
-                $.div({
-                    css: {
-                        'font-weight': '500'
-                    },
-                    html: "Ops! Houve um erro ao carregar"
-                }),
-                $.small({
-                    html: error.message || ""
-                }),
-                $.div({
-                    html: $.span({
-                        css: {
-                            'margin-top': 10,
-                            'padding': '9px',
-                            'background': '#fff',
-                            'border-radius': '5px',
-                            'color': '#941818',
-                            'cursor': 'pointer',
-                            'display': 'inline-block'
-                        },
-                        html: "Atualizar página",
-                        click: () => window.location.reload()
-                    })
-                })
-            ]
-        }),
-
+        /**
+         * @param {object} props 
+         * @param {string} props.title
+         * @param {string} props.description
+         * @param {string|array} props.solutions
+         */
         error: (props={}) => $.div({
             css: {
                 padding: 20,
@@ -201,7 +173,7 @@ export default function Router(props={}){
                         'font-size': "25px",
                         'font-weight': '400'
                     },
-                    html: `Erro: ${props.title}`,
+                    html: props.title,
                 }),
 
                 props.description && $.div({
@@ -213,7 +185,41 @@ export default function Router(props={}){
                         'width': '100%',
                         'color': '#686868'
                     },
-                    html: props.description
+                    html: function(){
+
+                        let type = $.type(props.description);
+
+                        if ( ['string', 'array'].includes(type) ) return props.description;
+
+                        if ( type == 'object' ){
+
+                            let {element, file, line} = props.description;
+
+                            return [
+                                $.div([
+                                    $.span({
+                                        css: {'font-weight': 500, 'margin-right': 5},
+                                        html: "Elemento:"
+                                    }),
+                                    $.span(element)
+                                ]),
+                                $.div([
+                                    $.span({
+                                        css: {'font-weight': 500, 'margin-right': 5},
+                                        html: "Arquivo:"
+                                    }),
+                                    $.span(file)
+                                ]),
+                                $.div([
+                                    $.span({
+                                        css: {'font-weight': 500, 'margin-right': 5},
+                                        html: "Linha:"
+                                    }),
+                                    $.span(line)
+                                ])
+                            ]
+                        }
+                    }
                 }),
 
                 props.solutions && $.div({
@@ -666,7 +672,6 @@ export default function Router(props={}){
         buildDynamicComponent: function(component={}){
 
             let methodName = "default";
-            let hasFailComponent = typeof component.fail == "function";
             let hasPlaceholderComponent = typeof component.placeholder == "function";
 
             let componentData = component;
@@ -693,25 +698,20 @@ export default function Router(props={}){
                     })
                     .catch((error) => {
 
-                        Core.ifDebug('flow') && console.log("[Jeact Router] Component importing Failed!", error);
+                        console.error("[Jeact Router] Component importing Failed!", error);
 
+                        let errorData = Core.getCompileErroData(error);
 
-                        let FailComponent = hasFailComponent
-                            
-                            /**
-                             * @todo
-                             * - Refatorar
-                             */
-                            ? componentData.fail()
-                                .then(response => Core.setDynamicComponent({
-                                    response
-                                }))
-
-                            : Ui.fail;
-    
-                            Core.set({
-                                component: FailComponent.bind(null, error, state.get("route").request)
-                            });
+                        if ( Core.isDev() ) return Core.throwError({
+                            title: errorData.message,
+                            notes: ["Verifique o console do navegador para mais informações"],
+                            description: {
+                                element: errorData.element,
+                                file: errorData.file,
+                                line: errorData.line
+                            }
+                        });
+                        
                     })
 
                 return hasPlaceholderComponent && componentData.placeholder(); 
@@ -744,6 +744,10 @@ export default function Router(props={}){
             });
         },
 
+        /**
+         * @param {string|object} code 
+         * @param {bool|object} data 
+         */
         throwError: function(code="unspecified", data={}){
 
             const request = state.get("route").request;
@@ -765,18 +769,18 @@ export default function Router(props={}){
 
             const erros = {
                 unspecified: {
-                    title: "Houve algum erro",
+                    title: "Erro: Houve um erro desconhecido",
                     description: "Erro não especificado"
                 },
                 invalid_component: {
-                    title: "Componente inválido",
+                    title: "Erro: Componente inválido",
                     description: `Método "${data.methodName}" não encontrado`,
                     solutions: [
                         "Verifique no arquivo do componente, se o mesmo foi exportado como 'default'"
                     ]
                 },
                 main_component_not_found: {
-                    title: "Componente não encontrado",
+                    title: "Erro: Componente não encontrado",
                     description: `Componente <i>main</i> da rota não foi encontrado`,
                     solutions: [
                         `Verifique na configuração das rotas, se foi infomado o componente 'main' para a rota ${request.path}`
@@ -784,7 +788,15 @@ export default function Router(props={}){
                 }
             };
 
-            const error = erros[code || 'unspecified'];
+            const isObjError = $.type(code) == "object";
+
+            const error = isObjError 
+                ? {
+                    title: code.title, 
+                    description: code.description,
+                    solutions: code.notes
+                }
+                : erros[code || 'unspecified'];
             
             if ( !isVisible ) return;
 
@@ -797,9 +809,38 @@ export default function Router(props={}){
             });
         },
 
+        getCompileErroData: (error={}) => {
+
+            let response = {
+                element: 'Não identificado',
+                file: 'Não identificado',
+                message: 'Erro desconhecido',
+                line: 'Não identificado'
+            };
+
+            try {
+                let errorParts = error.stack.split('\n');
+                let message = errorParts[0];
+                let componentDataParts = errorParts[1].trim().split(' ') || [];
+                let element = componentDataParts[1] || 'Não identificado';
+                let filename = componentDataParts[2] || '';
+                let filenameParts = filename.split('./')[1].split('?:');
+                let file = filenameParts[0];
+                let line = filenameParts[1].split(':')[0];
+
+                response.message = message;
+                response.element = element;
+                response.file = file;
+                response.line = line;
+
+            } catch (error) {}
+
+            return response;
+        },
+
         ifDebug: type => {
             
-            if ( Configs.debug === false ) return false;
+            if ( Configs.debug === false || !Core.isDev() ) return false;
 
             if ( typeof type === 'undefined' ) return true;
 
@@ -814,6 +855,8 @@ export default function Router(props={}){
             
             return debugTypeRequested.includes(type);
         },
+
+        isDev: () => Configs.env.toLowerCase() == 'dev',
 
         api: function(){
             return {
