@@ -5,7 +5,6 @@ export default function JeactDOM(){
         return;
     }
 
-   
 
     const Core = {
         factory: function(tag){

@@ -12,7 +12,6 @@ JeactDOM();
 let componentHooks = [];
 let currentHookIndex = 0;
 
-
 const context = Context();
 
 export default function State(initialState={}, contextName=null){
