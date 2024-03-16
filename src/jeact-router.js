@@ -8,9 +8,6 @@
  * - [X] Implementar metodo render
  * - [X] Implementar groups (childrens)
  * - [X] Refatorar add routes (add no init)
- * - [ ] Implementar componente de fail default
- * - [ ] Implementar componente de fail default a nivel de grupo
- * - [ ] Implementar componente de fail default a nivel global
  * - [ ] Implementar lang para mensagens
  * - [ ] Implementar hook para import com erro
  * - [ ] Implementar componente de placeholder default
@@ -44,7 +41,8 @@ export default function Router(props={}){
         root: false,
         historyMode: true,
         caseInsensitive: true,
-        fallback: "",
+        fallback: null,
+        defaultComponents: {},
         routes: [],
         importMethod: null,
         importDelay: 200,
@@ -121,39 +119,6 @@ export default function Router(props={}){
     };
 
     const Ui = {
-        fallback: () => $.div({
-            html: $.div({
-                css: {
-                    "padding": '20px',
-                    'text-align': 'center',
-                    "display": 'flex',
-                    'align-items': 'center',
-                    'justify-content': 'center',
-                    "height": '100vH'
-                },
-                html: [
-                    $.div({
-                        css: {
-                            'font-weight': 'bold',
-                            'font-size':' 6rem',
-                        },
-                        html: "404"
-                    }),
-                    $.div({
-                        css: {
-                            "color": '#bdbdbd',
-                            'font-size': '45px',
-                            'font-weight': '500',
-                            'max-width': '260px',
-                            'line-height': '40px',
-                            'text-align': 'left',
-                            "margin": '0 0 0 15px',
-                        },
-                        html: "Página não encontrada"
-                    })
-                ]
-            })
-        }),
 
         /**
          * @param {object} props 
@@ -323,15 +288,6 @@ export default function Router(props={}){
                     Core.get(route);
                 });
 
-                if ( !Configs.fallback ){
-                    Core.get({
-                        path: "/404",
-                        handler: {
-                            component: Ui.fallback
-                        }
-                    })
-                }
-
                 Core.run();
                 
                 if ( Configs.container ){
@@ -415,11 +371,10 @@ export default function Router(props={}){
 
         run: function(){
 
-            
             const path = Core.requestPath();
             const fixedRouteFound = Core.routesIndex.fixed[path];
 
-            Core.ifDebug('data') 
+            Core.isDebug('data') 
                 && console.log("[Jeact Router] Routes", {
                     routes: Core.routes, 
                     routesIndex: Core.routesIndex, 
@@ -432,12 +387,12 @@ export default function Router(props={}){
             const pathGroup = path.split("/")[1] || '/';
             const variableRoutes = Core.routesIndex.variable[pathGroup] || [];
 
-            Core.ifDebug('flow') 
+            Core.isDebug('flow') 
                 && console.log("[Jeact Router] Searching in variable routes...", {variableRoutes, path});
 
             let found = false;
             
-            variableRoutes.some((route)=>{
+            variableRoutes.some((route) => {
 
                 // console.log( Core.requestPath(), route, (Core.requestPath().match(route.regExp)))
                 let match = path.match(route.regExp);
@@ -449,23 +404,26 @@ export default function Router(props={}){
                     return Core.setMatch(route, path);
                 }
             })
-      
+
             if ( !found ){
 
-                Core.ifDebug('flow') && console.log('[Jeact Router] Route Not Found!');
+                Core.isDebug('flow') && console.log('[Jeact Router] Route Not Found!');
 
-                if ( !Configs.fallback ) return Core.goTo("/404");
+                if ( typeof Configs.fallback == 'function' ){
+                    return Core.set({
+                        component: {
+                            main: Configs.fallback
+                        }
+                    })
+                }
 
-                let request = {};
-                request.path = window.location.pathname;
-
-                return Core.goTo(Configs.fallback);
+                return Core.throwError("no_fallback_route");
             }
         },
 
         setMatch: (route, path) => {
 
-            Core.ifDebug('flow') && console.log("[Jeact Router] Route Matched", {route, match: true})
+            Core.isDebug('flow') && console.log("[Jeact Router] Route Matched", {route, match: true})
 
             route.current = true;
 
@@ -520,7 +478,7 @@ export default function Router(props={}){
          */
         render: function(component=null){
 
-            //console.log("[Router] render", {state, component});
+            Core.isDebug('flow')  && console.log("[Router] render", {state, component});
 
             if ( !component || component instanceof jQuery ){
                 component = route => $.div({
@@ -536,7 +494,6 @@ export default function Router(props={}){
          * Ativa rota no state
          * @param {object} props
          * @param {function|object} props.component
-         * @param {string} props.title
          */
         set: function(props={}){
             let routeData = $.extend(true, state.get("route"), props);
@@ -684,12 +641,12 @@ export default function Router(props={}){
 
             return () => {
 
-                Core.ifDebug('flow') && console.log("[Jeact Router] Importing component...");
+                Core.isDebug('flow') && console.log("[Jeact Router] Importing component...");
 
                 mainComponent()
                     .then(function(response){
 
-                        Core.ifDebug('flow') && console.log("[Jeact Router] Component importing Done!", response);
+                        Core.isDebug('flow') && console.log("[Jeact Router] Component importing Done!", response);
 
                         return Core.setDynamicComponent({
                             response,
@@ -768,23 +725,38 @@ export default function Router(props={}){
             let isVisible = typeof Configs.error == "string" && Configs.error.includes('visible');
 
             const erros = {
-                unspecified: {
-                    title: "Erro: Houve um erro desconhecido",
-                    description: "Erro não especificado"
+                unspecified: () => {
+                    return {
+                        title: "Erro: Houve um erro desconhecido",
+                        description: "Erro não especificado"
+                    }
                 },
-                invalid_component: {
-                    title: "Erro: Componente inválido",
-                    description: `Método "${data.methodName}" não encontrado`,
-                    solutions: [
-                        "Verifique no arquivo do componente, se o mesmo foi exportado como 'default'"
-                    ]
+                invalid_component: () => {
+                    return {
+                        title: "Erro: Componente inválido",
+                        description: `Método "${data.methodName}" não encontrado`,
+                        solutions: [
+                            "Verifique no arquivo do componente, se o mesmo foi exportado como 'default'"
+                        ]
+                    }
                 },
-                main_component_not_found: {
-                    title: "Erro: Componente não encontrado",
-                    description: `Componente <i>main</i> da rota não foi encontrado`,
-                    solutions: [
-                        `Verifique na configuração das rotas, se foi infomado o componente 'main' para a rota ${request.path}`
-                    ]
+                main_component_not_found: () =>{
+                    return {
+                        title: "Erro: Componente não encontrado",
+                        description: `Componente <i>main</i> da rota não foi encontrado`,
+                        solutions: [
+                            `Verifique na configuração das rotas, se foi infomado o componente 'main' para a rota ${request.path}`
+                        ]
+                    }
+                },
+                no_fallback_route: () => {
+                    return {
+                        title: "Erro: 404!",
+                        description: `Nenhum componente definido para a rota ${window.location.pathname}`,
+                        solutions: [
+                            "Verifique se a rota acima existe ou se foi definido um component fallback configurações do Jeact Router"
+                        ]
+                    }
                 }
             };
 
@@ -796,13 +768,13 @@ export default function Router(props={}){
                     description: code.description,
                     solutions: code.notes
                 }
-                : erros[code || 'unspecified'];
+                : erros[code || 'unspecified']();
             
             if ( !isVisible ) return;
 
             let errorComponent = Ui.error.bind(null, error);
 
-            if (isReturnComponent ) return errorComponent;
+            if ( isReturnComponent ) return errorComponent;
 
             return Core.set({
                 component: errorComponent
@@ -838,9 +810,11 @@ export default function Router(props={}){
             return response;
         },
 
-        ifDebug: type => {
+        isDebug: type => {
             
             if ( Configs.debug === false || !Core.isDev() ) return false;
+
+            if ( Configs.debug === true ) return true;
 
             if ( typeof type === 'undefined' ) return true;
 
