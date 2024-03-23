@@ -55,6 +55,10 @@ export default function Router(props={}){
         route: {}
     });
 
+    const LocalState = {
+        prevPath: window.location.pathname
+    };
+
     const Query = {
 
         get: function(key="", props={}){
@@ -438,8 +442,36 @@ export default function Router(props={}){
             if ( typeof route.handler == "function" ) 
                 return route.handler(request, {set: Core.set});
 
-            if ( $.type(route.handler) == "object" ) 
+            if ( $.type(route.handler) == "object" ){
+
+                let isSamePath = LocalState.prevPath == path;
+
+                // console.log({LocalState, isSamePath, revalited: route.handler.revalidate})
+
+                if ( LocalState.isRevalidatedPath ){
+                    window.location.href = path;
+                    return;
+                } 
+
+                if ( route.handler.revalidate ) {
+    
+                    // Quando é o path que precisa revalidar
+                    // não faz nada, do contrário, redireciona
+                    if ( !isSamePath ) {
+                        window.location.href = path;
+                        return;
+                    }
+
+                    // Quando a rota atual é do tipo que 
+                    // precisa ser revalidada, adiciona essa flag
+                    // para fazer um redirect de volta para uma rota
+                    // para outra rota que não revalida
+                    LocalState.isRevalidatedPath = true;
+                }
+
                 return Core.set(route.handler);
+            }
+                
 
             return Core.api();
         },
@@ -447,6 +479,8 @@ export default function Router(props={}){
         goTo: function(url, data={}, title ="", run=true){
 
             if ( !url || typeof url != "string" ) return Core.api();
+
+            LocalState.prevPath = window.location.pathname;
 
             url = Configs.root 
                 ? `${Configs.root}${url}` 
