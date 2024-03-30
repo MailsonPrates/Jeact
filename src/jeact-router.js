@@ -277,6 +277,7 @@ export default function Router(props={}){
         query: {},
 
         init: function(){
+
             Core.initHistoryMode();
             Core.query = Query.get();
 
@@ -328,7 +329,8 @@ export default function Router(props={}){
                 name: null,
                 current: false,
                 group: group,
-                custom: props.custom
+                custom: props.custom,
+                title: props.title,
             }
       
             if ( Configs.caseInsensitive ) {
@@ -434,6 +436,7 @@ export default function Router(props={}){
             let request = {};
             request.params = Core.processRequestParameters(route);
             request.custom = route.custom;
+            request.title = route.title;
             request.query = Core.query;
             request.path = path;
 
@@ -476,7 +479,7 @@ export default function Router(props={}){
             return Core.api();
         },
 
-        goTo: function(url, data={}, title ="", run=true){
+        goTo: function(url, data={}, title =null, run=true){
 
             if ( !url || typeof url != "string" ) return Core.api();
 
@@ -496,7 +499,10 @@ export default function Router(props={}){
                 return window.location.href = url;
             }
       
+            console.log(':: goTo', {url, data});
+
             window.history.pushState(data, title, url);
+
             Core.query = Query.get();
             run && Core.run();
 
@@ -650,7 +656,8 @@ export default function Router(props={}){
 
             if ( !browserSupportState ) return;
     
-            window.addEventListener("popstate", function(){
+            window.addEventListener("popstate", function(e){
+                console.log({e}, window.location.pathname);
                 Core.query = Query.get();
                 Core.run();
             });
