@@ -23,6 +23,7 @@ import State from "./jeact-state.js";
  * @param {object} props
  * @param {string} props.root
  * @param {bool} props.historyMode
+ * @param {string} props.documentTitle
  * @param {bool} props.caseInsensitive
  * @param {string} props.fallback
  * @param {array} props.routes
@@ -48,6 +49,7 @@ export default function Router(props={}){
         importDelay: 200,
         error: 'visible',
         debug: false,
+        documentTitle: '',
         env: 'dev'
     }, props);
 
@@ -431,14 +433,17 @@ export default function Router(props={}){
 
             Core.isDebug('flow') && console.log("[Jeact Router] Route Matched", {route, match: true})
 
+            route = Core.processRequestParameters(route);
             route.current = true;
 
             let request = {};
-            request.params = Core.processRequestParameters(route);
+            request.params = route.params;
             request.custom = route.custom;
             request.title = route.title;
             request.query = Core.query;
             request.path = path;
+
+            document.title = Core.getDocumentTitle(route.title);
 
             state.get("route").request = request;
 
@@ -626,18 +631,26 @@ export default function Router(props={}){
 
         processRequestParameters(route){
             let routeMatched = Core.requestPath().match(route.regExp);
+
+            let params = {};
+            let title = route.title || '';
             
-            if ( !routeMatched ) return;
+            if ( routeMatched ){
+                
+                routeMatched.forEach((value, index)=>{
+                    if ( index !== 0 ){
+                        let key = Object.getOwnPropertyNames(route.parameters[index - 1]);
+                        console.log({routeMatched, key, value});
+                        params[key] = value;
+                        title = title.replace(`{${key}}`, value);
+                    }
+                });
+            }
 
-            let param = {};
-            routeMatched.forEach((value, index)=>{
-                if ( index !== 0 ){
-                    let key = Object.getOwnPropertyNames(route.parameters[index - 1]);
-                    param[key] = value;
-                }
-            });
+            route.params = params;
+            route.title = title;
 
-            return param;
+            return route;
         },        
               
         containsParameter: function(path){
@@ -646,6 +659,16 @@ export default function Router(props={}){
 
         requestPath: function(){
             return window.location.pathname;
+        },
+
+        getDocumentTitle: routeTitle => {
+
+            let title = routeTitle || '';
+            let subtitle = Configs.documentTitle || 'App';
+
+            return title
+                ? `${title} | ${subtitle}`
+                : subtitle;
         },
 
         initHistoryMode: function(){
