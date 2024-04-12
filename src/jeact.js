@@ -1,4 +1,4 @@
-import JeactDOM from "./jeact-dom";
+import JeactDOM from "./jeact-dom.js";
 
 export default function Jeact(config={}){
 
