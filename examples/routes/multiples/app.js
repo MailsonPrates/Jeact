@@ -40,7 +40,9 @@ export default function App(){
                 path: "/", 
                 handler: (req, route) => route.set({
                     title: "Home",
-                    component: Home
+                    component: {
+                        main: Home
+                    }
                 })
             },
             {
@@ -50,7 +52,9 @@ export default function App(){
                 path: "/category/{name}", 
                 handler: {
                     title: "Category",
-                    component: Category
+                    component: {
+                        main: Category
+                    }
                 }
             },
             {

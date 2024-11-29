@@ -301,6 +301,7 @@ export default function Router(props={}){
                     $(function(){
                         Core.goTo(Configs.initial, {}, "", false);
                         $(Configs.container).html(Core.render());
+                        console.log({routes: Core.routes})
                     })
                 }
             }
@@ -366,7 +367,18 @@ export default function Router(props={}){
             let pathAlreadyExist = Core.paths.indexOf(path) !== -1;
 
             if ( pathAlreadyExist ) return;
-      
+
+            /**
+             * Verifica permissão se houver
+             */
+            if ( Configs.permissions ){
+                let isForbidden = Configs.permissions.validator(route);
+
+                if ( !isForbidden ){
+                    handler.component.main = Configs.permissions.forbidden;
+                }
+            }
+
             route.path = path;
             route.handler = handler;
             route.parameters = Core.proccessParameters(route.path);
@@ -499,6 +511,7 @@ export default function Router(props={}){
             }
 
             if ( !Configs.historyMode ){
+                console.log("[AQUI....]")
                 let storage = window.localStorage;
                 storage.setItem("pushState", data);
                 return window.location.href = url;
@@ -510,6 +523,8 @@ export default function Router(props={}){
 
             Core.query = Query.get();
             run && Core.run();
+
+            console.log(Core.query)
 
             return Core.api();
         },
