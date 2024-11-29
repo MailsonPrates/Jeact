@@ -1,0 +1,16 @@
+{
+  "name": "@mailson-prates/jeact",
+  "version": "0.0.3",
+  "description": "Jeact = jQuery + ESM + reactive programming",
+  "main": "index.js",
+  "private": false,
+  "scripts": {
+    "test": ""
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MailsonPrates/Jeact.git"
+  },
+  "author": "Mailson Prates",
+  "license": "ISC"
+}

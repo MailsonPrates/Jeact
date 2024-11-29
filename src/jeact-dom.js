@@ -1,6 +1,10 @@
-(function($){
+export default function JeactDOM(){
 
-    if ( $["__jeact-util-set"] ) return;
+    if ( !window.jQuery ){
+        console.error("jQuery not loaded yet!");
+        return;
+    }
+
 
     const Core = {
         factory: function(tag){
@@ -128,10 +132,23 @@
             }
 
             return content;
-        }
-        
+        },
 
+        setElements: (elements=[]) => {
+
+            let elementsList = Array.isArray(elements) ? elements : [elements];
+
+            elementsList.forEach(item => Core.factory(item));
+        },
+
+        api: () => {
+            return {
+                setElements: Core.setElements
+            }
+        }
     }
+
+    if ( $["__JEACT_DOM_SET"] ) return Core.api();
 
     Core.factory("div");
     Core.factory("span");
@@ -149,6 +166,7 @@
     Core.factory("select");
     Core.factory("option");
     Core.factory("textarea");
+    Core.factory("small");
 
     Core.factory("ul");
     Core.factory("li");
@@ -215,8 +233,7 @@
      * $.setClass(cond === true ? "true-class");
      */
 
+    $["__JEACT_DOM_SET"] = true;
 
-    $["__jeact-util-set"] = true;
-
-
-})(jQuery)
+    return Core.api();
+}

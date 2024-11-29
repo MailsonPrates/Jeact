@@ -1,3 +1,3 @@
 # Jeact
 
-Jeact = jQuery + ESM + reactive
+Jeact = jQuery + ESM + reactive programming
