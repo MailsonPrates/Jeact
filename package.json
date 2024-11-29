@@ -1,6 +1,6 @@
 {
   "name": "@mailson-prates/jeact",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Jeact = jQuery + ESM + reactive programming",
   "main": "index.js",
   "private": false,
