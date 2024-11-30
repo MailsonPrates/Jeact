@@ -368,16 +368,6 @@ export default function Router(props={}){
 
             if ( pathAlreadyExist ) return;
 
-            /**
-             * Verifica permissão se houver
-             */
-            if ( Configs.permissions ){
-                let isForbidden = Configs.permissions.validator(route);
-
-                if ( !isForbidden ){
-                    handler.component.main = Configs.permissions.forbidden;
-                }
-            }
 
             route.path = path;
             route.handler = handler;
@@ -458,6 +448,19 @@ export default function Router(props={}){
             document.title = Core.getDocumentTitle(route.title);
 
             state.get("route").request = request;
+
+            //console.log({route, path})
+
+             /**
+             * Verifica permissão se houver
+             */
+             if ( Configs.permissions ){
+                let isForbidden = Configs.permissions.validator(route);
+
+                if ( !isForbidden ){
+                    handler.component.main = Configs.permissions.forbidden;
+                }
+            }
 
             if ( typeof route.handler == "function" ) 
                 return route.handler(request, {set: Core.set});
