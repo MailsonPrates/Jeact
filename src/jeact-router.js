@@ -449,16 +449,20 @@ export default function Router(props={}){
 
             state.get("route").request = request;
 
-            //console.log({route, path})
+            //console.log({route, path, handler: route.handler})
 
              /**
              * Verifica permissão se houver
              */
-             if ( Configs.permissions ){
+            if ( Configs.permissions ){
                 let isForbidden = Configs.permissions.validator(route);
 
                 if ( !isForbidden ){
-                    route.handler = Configs.permissions.forbidden;
+                    route.handler = {
+                        component: {
+                            main: Configs.permissions.forbidden
+                        } 
+                    };
                 }
             }
 
