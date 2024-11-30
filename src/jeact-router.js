@@ -458,7 +458,7 @@ export default function Router(props={}){
                 let isForbidden = Configs.permissions.validator(route);
 
                 if ( !isForbidden ){
-                    handler.component.main = Configs.permissions.forbidden;
+                    route.handler = Configs.permissions.forbidden;
                 }
             }
 
